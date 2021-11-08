@@ -1,13 +1,7 @@
 package main
 
-import (
-	"fmt"
-	"pkg/hasher"
-)
+import "github.com/oleksandr-chornovol/lets-go-chat/server"
 
 func main() {
-	password := "password"
-	hash, _ := hasher.HashPassword(password)
-	fmt.Println(hash)
-	fmt.Println(hasher.CheckPasswordHash(password, hash))
+	server.Start()
 }
