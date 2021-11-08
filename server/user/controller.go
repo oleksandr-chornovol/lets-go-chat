@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"pkg/hasher"
-	"strconv"
 )
 
 func Register(response http.ResponseWriter, request *http.Request) {
@@ -25,7 +24,7 @@ func Register(response http.ResponseWriter, request *http.Request) {
 		user := CreateUser(userData)
 		response.WriteHeader(http.StatusCreated)
 		json.NewEncoder(response).Encode(map[string]string{
-			"id": strconv.Itoa(user.Id),
+			"id": user.Id,
 			"name": user.Name,
 		})
 	}
