@@ -1,7 +1,7 @@
-package server
+package http
 
 import (
-	"github.com/oleksandr-chornovol/lets-go-chat/server/user"
+	userController "github.com/oleksandr-chornovol/lets-go-chat/app/http/controllers"
 	"net/http"
 )
 
@@ -11,11 +11,11 @@ type Route struct {
 }
 
 var routes = []Route {
-	{"/v1/user", user.Register},
-	{"/v1/user/login", user.Login},
+	{"/v1/user", userController.Register},
+	{"/v1/user/login", userController.Login},
 }
 
-func RouterInit() {
+func InitRoutes() {
 	for _, route := range routes {
 		http.HandleFunc(route.Path, route.Handler)
 	}

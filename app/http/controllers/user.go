@@ -3,6 +3,8 @@ package user
 import (
 	"encoding/json"
 	"fmt"
+	userModel "github.com/oleksandr-chornovol/lets-go-chat/app/models"
+	"log"
 	"net/http"
 	"pkg/hasher"
 )
@@ -16,12 +18,12 @@ func Register(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	_, userExists := GetUserByName(userData.Name)
+	_, userExists := userModel.GetUserByName(userData.Name)
 	if userExists {
 		response.WriteHeader(http.StatusConflict)
 		fmt.Fprint(response, "Name is already taken.")
 	} else {
-		user := CreateUser(userData)
+		user := userModel.CreateUser(userData)
 		response.WriteHeader(http.StatusCreated)
 		json.NewEncoder(response).Encode(map[string]string{
 			"id": user.Id,
@@ -32,7 +34,7 @@ func Register(response http.ResponseWriter, request *http.Request) {
 
 func Login(response http.ResponseWriter, request *http.Request) {
 	userData := getUserData(request)
-	user, userExists := GetUserByName(userData.Name)
+	user, userExists := userModel.GetUserByName(userData.Name)
 
 	if userExists {
 		if hasher.CheckPasswordHash(userData.Password, user.Password) {
@@ -49,12 +51,12 @@ func Login(response http.ResponseWriter, request *http.Request) {
 	}
 }
 
-func getUserData(request *http.Request) User {
+func getUserData(request *http.Request) userModel.User {
 	decoder := json.NewDecoder(request.Body)
-	var userData User
+	var userData userModel.User
 	err := decoder.Decode(&userData)
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 	return userData
 }
