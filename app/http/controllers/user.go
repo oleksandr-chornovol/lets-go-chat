@@ -1,15 +1,16 @@
-package user
+package controllers
 
 import (
 	"encoding/json"
 	"fmt"
-	userModel "github.com/oleksandr-chornovol/lets-go-chat/app/models"
+	"github.com/oleksandr-chornovol/lets-go-chat/app/models"
 	"log"
 	"net/http"
 	"pkg/hasher"
 )
 
 func Register(response http.ResponseWriter, request *http.Request) {
+	response.Header().Set("Content-Type", "application/json")
 	userData := getUserData(request)
 
 	if len(userData.Name) < 4 || len(userData.Password) < 8 {
@@ -18,14 +19,14 @@ func Register(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	_, userExists := userModel.GetUserByName(userData.Name)
+	_, userExists := models.GetUserByName(userData.Name)
 	if userExists {
 		response.WriteHeader(http.StatusConflict)
 		fmt.Fprint(response, "Name is already taken.")
 	} else {
-		user := userModel.CreateUser(userData)
+		user := models.CreateUser(userData)
 		response.WriteHeader(http.StatusCreated)
-		json.NewEncoder(response).Encode(map[string]string{
+		json.NewEncoder(response).Encode(map[string]string {
 			"id": user.Id,
 			"name": user.Name,
 		})
@@ -33,13 +34,15 @@ func Register(response http.ResponseWriter, request *http.Request) {
 }
 
 func Login(response http.ResponseWriter, request *http.Request) {
+	response.Header().Set("Content-Type", "application/json")
 	userData := getUserData(request)
-	user, userExists := userModel.GetUserByName(userData.Name)
+	user, userExists := models.GetUserByName(userData.Name)
 
 	if userExists {
 		if hasher.CheckPasswordHash(userData.Password, user.Password) {
-			json.NewEncoder(response).Encode(map[string]string{
-				"url": request.Host + "/ws%token=one-time-token",
+			token := models.CreateToken(user.Id)
+			json.NewEncoder(response).Encode(map[string]string {
+				"url": "ws://" + request.Host + "/v1/chat?token=" + token,
 			})
 		} else {
 			response.WriteHeader(http.StatusUnauthorized)
@@ -51,9 +54,9 @@ func Login(response http.ResponseWriter, request *http.Request) {
 	}
 }
 
-func getUserData(request *http.Request) userModel.User {
+func getUserData(request *http.Request) models.User {
 	decoder := json.NewDecoder(request.Body)
-	var userData userModel.User
+	var userData models.User
 	err := decoder.Decode(&userData)
 	if err != nil {
 		log.Println(err)
