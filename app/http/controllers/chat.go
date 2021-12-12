@@ -4,19 +4,25 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
-	"github.com/oleksandr-chornovol/lets-go-chat/app/models"
-	"github.com/oleksandr-chornovol/lets-go-chat/cache"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/oleksandr-chornovol/lets-go-chat/app/models"
+	"github.com/oleksandr-chornovol/lets-go-chat/cache"
 )
 
 func StartEcho(response http.ResponseWriter, request *http.Request) {
 	tokenId := request.URL.Query().Get("token")
 
-	token, tokenExists := models.GetTokenById(tokenId)
+	token, err := models.GetTokenById(tokenId)
+	if err != nil {
+		log.Println("GetTokenById failed, err:", err)
+		response.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
-	if tokenExists {
+	if ! token.IsEmpty() {
 		if time.Now().String() < token.ExpiresAt {
 			upgrader := websocket.Upgrader{}
 			conn, err := upgrader.Upgrade(response, request, nil)

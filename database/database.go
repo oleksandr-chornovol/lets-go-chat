@@ -4,10 +4,11 @@ import (
 	"context"
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/oleksandr-chornovol/lets-go-chat/config"
-	"github.com/oleksandr-chornovol/lets-go-chat/database/drivers"
 	"log"
 	"time"
+
+	"github.com/oleksandr-chornovol/lets-go-chat/config"
+	"github.com/oleksandr-chornovol/lets-go-chat/database/drivers"
 )
 
 var db *sql.DB

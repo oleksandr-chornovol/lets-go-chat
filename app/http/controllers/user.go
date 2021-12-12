@@ -3,10 +3,11 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/oleksandr-chornovol/lets-go-chat/app/models"
 	"log"
 	"net/http"
 	"pkg/hasher"
+
+	"github.com/oleksandr-chornovol/lets-go-chat/app/models"
 )
 
 func Register(response http.ResponseWriter, request *http.Request) {
@@ -19,28 +20,48 @@ func Register(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	_, userExists := models.GetUserByName(userData.Name)
-	if userExists {
+	user, err := models.GetUserByName(userData.Name)
+	if err != nil {
+		log.Println("GetUserByName failed, err:", err)
+		response.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if user.IsEmpty() {
+		user, err := models.CreateUser(userData)
+		if err == nil {
+			response.WriteHeader(http.StatusCreated)
+			json.NewEncoder(response).Encode(map[string]string{
+				"id":   user.Id,
+				"name": user.Name,
+			})
+		} else {
+			log.Println(err)
+			response.WriteHeader(http.StatusInternalServerError)
+		}
+	} else {
 		response.WriteHeader(http.StatusConflict)
 		fmt.Fprint(response, "Name is already taken.")
-	} else {
-		user := models.CreateUser(userData)
-		response.WriteHeader(http.StatusCreated)
-		json.NewEncoder(response).Encode(map[string]string {
-			"id": user.Id,
-			"name": user.Name,
-		})
 	}
 }
 
 func Login(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
 	userData := getUserData(request)
-	user, userExists := models.GetUserByName(userData.Name)
+	user, err := models.GetUserByName(userData.Name)
+	if err != nil {
+		log.Println("GetUserByName failed, err:", err)
+		response.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
-	if userExists {
+	if ! user.IsEmpty() {
 		if hasher.CheckPasswordHash(userData.Password, user.Password) {
-			token := models.CreateToken(user.Id)
+			token, err := models.CreateToken(user.Id)
+			if err != nil {
+				log.Println("CreateToken failed, err:", err)
+				response.WriteHeader(http.StatusInternalServerError)
+				return
+			}
 			json.NewEncoder(response).Encode(map[string]string {
 				"url": "ws://" + request.Host + "/v1/chat?token=" + token,
 			})

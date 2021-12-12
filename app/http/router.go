@@ -3,8 +3,9 @@ package http
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/oleksandr-chornovol/lets-go-chat/app/http/controllers"
 	"net/http"
+
+	"github.com/oleksandr-chornovol/lets-go-chat/app/http/controllers"
 )
 
 var router = chi.NewRouter()

@@ -2,9 +2,10 @@ package models
 
 import (
 	"github.com/google/uuid"
-	"github.com/oleksandr-chornovol/lets-go-chat/database"
 	"log"
 	"pkg/hasher"
+
+	"github.com/oleksandr-chornovol/lets-go-chat/database"
 )
 
 type User struct {
@@ -13,7 +14,11 @@ type User struct {
 	Password string
 }
 
-func CreateUser(user User) User {
+func (u User) IsEmpty() bool {
+	return u == User{}
+}
+
+func CreateUser(user User) (User, error) {
 	user.Id = uuid.New().String()
 	user.Password, _ = hasher.HashPassword(user.Password)
 
@@ -22,16 +27,20 @@ func CreateUser(user User) User {
 		"name": user.Name,
 		"password": user.Password,
 	}
-	database.Driver.Insert("users", attributes)
+	err := database.Driver.Insert("users", attributes)
 
-	return user
+	return user, err
 }
 
-func GetUserById(id string) (User, bool) {
+func GetUserById(id string) (User, error) {
+	var user User
+
 	whereAttributes := map[string]string{"id": id}
-	users := database.Driver.Select("users", whereAttributes)
+	users, err := database.Driver.Select("users", whereAttributes)
+	if err != nil {
+		return user, err
+	}
 
-	var user User
 	for users.Next() {
 		err := users.Scan(&user.Id, &user.Name, &user.Password)
 		if err != nil {
@@ -39,14 +48,18 @@ func GetUserById(id string) (User, bool) {
 		}
 	}
 
-	return user, user != User{}
+	return user, nil
 }
 
-func GetUserByName(name string) (User, bool) {
-	whereAttributes := map[string]string{"name": name}
-	users := database.Driver.Select("users", whereAttributes)
-
+func GetUserByName(name string) (User, error) {
 	var user User
+
+	whereAttributes := map[string]string{"name": name}
+	users, err := database.Driver.Select("users", whereAttributes)
+	if err != nil {
+		return user, err
+	}
+
 	for users.Next() {
 		err := users.Scan(&user.Id, &user.Name, &user.Password)
 		if err != nil {
@@ -54,5 +67,5 @@ func GetUserByName(name string) (User, bool) {
 		}
 	}
 
-	return user, user != User{}
+	return user, nil
 }

@@ -2,14 +2,13 @@ package drivers
 
 import (
 	"database/sql"
-	"log"
 )
 
 type MySqlDriver struct {
 	DB *sql.DB
 }
 
-func (d MySqlDriver) Select(table string, attributes map[string]string) *sql.Rows {
+func (d MySqlDriver) Select(table string, attributes map[string]string) (*sql.Rows, error) {
 	query := "select * from " + table
 	var values []interface{}
 
@@ -22,15 +21,10 @@ func (d MySqlDriver) Select(table string, attributes map[string]string) *sql.Row
 		query = query[:len(query) - 1]
 	}
 
-	result, err := d.DB.Query(query, values...)
-	if err != nil {
-		log.Println(err)
-	}
-
-	return result
+	return d.DB.Query(query, values...)
 }
 
-func (d MySqlDriver) Insert(table string, attributes map[string]string) {
+func (d MySqlDriver) Insert(table string, attributes map[string]string) error {
 	query := "insert into " + table + " ("
 	columns := ""
 	valuesPlaceholders := ""
@@ -46,7 +40,6 @@ func (d MySqlDriver) Insert(table string, attributes map[string]string) {
 	query += columns + ") values (" + valuesPlaceholders + ")"
 
 	_, err :=  d.DB.Exec(query, values...)
-	if err != nil {
-		log.Println(err)
-	}
+
+	return err
 }
