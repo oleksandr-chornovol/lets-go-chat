@@ -11,3 +11,5 @@ var HerokuDBConfig = map[string]string {
 	"driver": "mysql",
 	"url": os.Getenv("DATABASE_URL"),
 }
+
+var LocalPort = "8080"

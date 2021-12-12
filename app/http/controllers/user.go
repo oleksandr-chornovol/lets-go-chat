@@ -1,15 +1,17 @@
-package user
+package controllers
 
 import (
 	"encoding/json"
 	"fmt"
-	userModel "github.com/oleksandr-chornovol/lets-go-chat/app/models"
 	"log"
 	"net/http"
 	"pkg/hasher"
+
+	"github.com/oleksandr-chornovol/lets-go-chat/app/models"
 )
 
 func Register(response http.ResponseWriter, request *http.Request) {
+	response.Header().Set("Content-Type", "application/json")
 	userData := getUserData(request)
 
 	if len(userData.Name) < 4 || len(userData.Password) < 8 {
@@ -18,28 +20,50 @@ func Register(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	_, userExists := userModel.GetUserByName(userData.Name)
-	if userExists {
+	user, err := models.GetUserByName(userData.Name)
+	if err != nil {
+		log.Println("GetUserByName failed, err:", err)
+		response.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if user.IsEmpty() {
+		user, err := models.CreateUser(userData)
+		if err == nil {
+			response.WriteHeader(http.StatusCreated)
+			json.NewEncoder(response).Encode(map[string]string{
+				"id":   user.Id,
+				"name": user.Name,
+			})
+		} else {
+			log.Println(err)
+			response.WriteHeader(http.StatusInternalServerError)
+		}
+	} else {
 		response.WriteHeader(http.StatusConflict)
 		fmt.Fprint(response, "Name is already taken.")
-	} else {
-		user := userModel.CreateUser(userData)
-		response.WriteHeader(http.StatusCreated)
-		json.NewEncoder(response).Encode(map[string]string{
-			"id": user.Id,
-			"name": user.Name,
-		})
 	}
 }
 
 func Login(response http.ResponseWriter, request *http.Request) {
+	response.Header().Set("Content-Type", "application/json")
 	userData := getUserData(request)
-	user, userExists := userModel.GetUserByName(userData.Name)
+	user, err := models.GetUserByName(userData.Name)
+	if err != nil {
+		log.Println("GetUserByName failed, err:", err)
+		response.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
-	if userExists {
+	if ! user.IsEmpty() {
 		if hasher.CheckPasswordHash(userData.Password, user.Password) {
-			json.NewEncoder(response).Encode(map[string]string{
-				"url": request.Host + "/ws%token=one-time-token",
+			token, err := models.CreateToken(user.Id)
+			if err != nil {
+				log.Println("CreateToken failed, err:", err)
+				response.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			json.NewEncoder(response).Encode(map[string]string {
+				"url": "ws://" + request.Host + "/v1/chat?token=" + token,
 			})
 		} else {
 			response.WriteHeader(http.StatusUnauthorized)
@@ -51,9 +75,9 @@ func Login(response http.ResponseWriter, request *http.Request) {
 	}
 }
 
-func getUserData(request *http.Request) userModel.User {
+func getUserData(request *http.Request) models.User {
 	decoder := json.NewDecoder(request.Body)
-	var userData userModel.User
+	var userData models.User
 	err := decoder.Decode(&userData)
 	if err != nil {
 		log.Println(err)

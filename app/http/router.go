@@ -1,22 +1,26 @@
 package http
 
 import (
-	userController "github.com/oleksandr-chornovol/lets-go-chat/app/http/controllers"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"net/http"
+
+	"github.com/oleksandr-chornovol/lets-go-chat/app/http/controllers"
 )
+
+var router = chi.NewRouter()
 
 type Route struct {
 	Path string
 	Handler func(http.ResponseWriter, *http.Request)
 }
 
-var routes = []Route {
-	{"/v1/user", userController.Register},
-	{"/v1/user/login", userController.Login},
-}
-
 func InitRoutes() {
-	for _, route := range routes {
-		http.HandleFunc(route.Path, route.Handler)
-	}
+	router.Use(middleware.Logger)
+	router.Use(middleware.Recoverer)
+
+	router.Post("/v1/user", controllers.Register)
+	router.Post("/v1/user/login", controllers.Login)
+	router.Get("/v1/user/active", controllers.GetActiveUsersCount)
+	router.Get("/v1/chat", controllers.StartEcho)
 }

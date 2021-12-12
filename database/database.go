@@ -4,22 +4,24 @@ import (
 	"context"
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
-	userModel "github.com/oleksandr-chornovol/lets-go-chat/app/models"
-	"github.com/oleksandr-chornovol/lets-go-chat/config"
-	"github.com/oleksandr-chornovol/lets-go-chat/database/drivers"
 	"log"
 	"time"
+
+	"github.com/oleksandr-chornovol/lets-go-chat/config"
+	"github.com/oleksandr-chornovol/lets-go-chat/database/drivers"
 )
 
 var db *sql.DB
 
+var Driver drivers.DBDriverInterface
+
 var migrations = []string {
 	`CREATE TABLE IF NOT EXISTS users(id varchar(100) primary key, name varchar(100), password varchar(100), UNIQUE(name))`,
+	`CREATE TABLE IF NOT EXISTS tokens(id varchar(100) primary key, user_id varchar(100), expires_at datetime)`,
 }
 
 func Init() {
-	//dbConfig := config.LocalDBConfig
-	dbConfig := config.HerokuDBConfig
+	dbConfig := config.LocalDBConfig
 	database, err := sql.Open(dbConfig["driver"], dbConfig["url"])
 	if err != nil {
 		log.Println(err)
@@ -27,13 +29,10 @@ func Init() {
 
 	db = database
 
-	var driver drivers.DBDriverInterface
 	switch dbConfig["driver"] {
 	case "mysql":
-		driver = drivers.MySqlDriver{DB: database}
+		Driver = drivers.MySqlDriver{DB: db}
 	}
-
-	userModel.DBDriver = driver
 }
 
 func Migrate() {
