@@ -28,15 +28,15 @@ func Register(response http.ResponseWriter, request *http.Request) {
 	}
 	if user.IsEmpty() {
 		user, err := models.CreateUser(userData)
-		if err == nil {
+		if err != nil {
+			log.Println(err)
+			response.WriteHeader(http.StatusInternalServerError)
+		} else {
 			response.WriteHeader(http.StatusCreated)
 			json.NewEncoder(response).Encode(map[string]string{
 				"id":   user.Id,
 				"name": user.Name,
 			})
-		} else {
-			log.Println(err)
-			response.WriteHeader(http.StatusInternalServerError)
 		}
 	} else {
 		response.WriteHeader(http.StatusConflict)
