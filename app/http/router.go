@@ -6,6 +6,8 @@ import (
 	"net/http"
 
 	"github.com/oleksandr-chornovol/lets-go-chat/app/http/controllers"
+	"github.com/oleksandr-chornovol/lets-go-chat/app/models"
+	"github.com/oleksandr-chornovol/lets-go-chat/cache"
 )
 
 var router = chi.NewRouter()
@@ -16,11 +18,21 @@ type Route struct {
 }
 
 func InitRoutes() {
+	userController := controllers.UserController {
+		TokenModel: models.Token{},
+		UserModel: models.User{},
+	}
+	chatController := controllers.ChatController {
+		ActiveUsersCache: cache.NewActiveUsersCache(),
+		TokenModel: models.Token{},
+		UserModel: models.User{},
+	}
+
 	router.Use(middleware.Logger)
 	router.Use(middleware.Recoverer)
 
-	router.Post("/v1/user", controllers.Register)
-	router.Post("/v1/user/login", controllers.Login)
-	router.Get("/v1/user/active", controllers.GetActiveUsersCount)
-	router.Get("/v1/chat", controllers.StartEcho)
+	router.Post("/v1/user", userController.Register)
+	router.Post("/v1/user/login", userController.Login)
+	router.Get("/v1/user/active", chatController.GetActiveUsersCount)
+	router.Get("/v1/chat", chatController.StartEcho)
 }

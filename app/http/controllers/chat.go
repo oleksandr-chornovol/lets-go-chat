@@ -12,10 +12,16 @@ import (
 	"github.com/oleksandr-chornovol/lets-go-chat/cache"
 )
 
-func StartEcho(response http.ResponseWriter, request *http.Request) {
+type ChatController struct {
+	ActiveUsersCache cache.ActiveUsersCacheInterface
+	TokenModel models.TokenInterface
+	UserModel models.UserInterface
+}
+
+func (cc ChatController) StartEcho(response http.ResponseWriter, request *http.Request) {
 	tokenId := request.URL.Query().Get("token")
 
-	token, err := models.GetTokenById(tokenId)
+	token, err := cc.TokenModel.GetTokenById(tokenId)
 	if err != nil {
 		log.Println("GetTokenById failed, err:", err)
 		response.WriteHeader(http.StatusInternalServerError)
@@ -24,17 +30,13 @@ func StartEcho(response http.ResponseWriter, request *http.Request) {
 
 	if ! token.IsEmpty() {
 		if time.Now().String() < token.ExpiresAt {
-			upgrader := websocket.Upgrader{}
-			conn, err := upgrader.Upgrade(response, request, nil)
-			if err != nil {
-				log.Print("upgrade failed: ", err)
-				return
-			}
+			wsUpgrader := websocket.Upgrader{}
+			conn, _ := wsUpgrader.Upgrade(response, request, nil)
 			defer conn.Close()
 
-			user, _ := models.GetUserById(token.UserId)
-			cache.AddUser(user)
-			defer cache.DeleteUser(user.Id)
+			user, _ := cc.UserModel.GetUserByField("id", token.UserId)
+			cc.ActiveUsersCache.AddUser(user)
+			defer cc.ActiveUsersCache.DeleteUser(user.Id)
 
 			for {
 				mt, message, err := conn.ReadMessage()
@@ -55,9 +57,9 @@ func StartEcho(response http.ResponseWriter, request *http.Request) {
 	}
 }
 
-func GetActiveUsersCount(response http.ResponseWriter, request *http.Request) {
+func (cc ChatController) GetActiveUsersCount(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(response).Encode(map[string]int {
-		"count_of_users": len(cache.GetAllUsers()),
+		"count_of_users": len(cc.ActiveUsersCache.GetAllUsers()),
 	})
 }

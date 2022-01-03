@@ -8,7 +8,7 @@ type MySqlDriver struct {
 	DB *sql.DB
 }
 
-func (d MySqlDriver) Select(table string, attributes map[string]string) (*sql.Rows, error) {
+func (d MySqlDriver) SelectRow(table string, attributes map[string]string) *sql.Row {
 	query := "select * from " + table
 	var values []interface{}
 
@@ -21,7 +21,7 @@ func (d MySqlDriver) Select(table string, attributes map[string]string) (*sql.Ro
 		query = query[:len(query) - 1]
 	}
 
-	return d.DB.Query(query, values...)
+	return d.DB.QueryRow(query, values...)
 }
 
 func (d MySqlDriver) Insert(table string, attributes map[string]string) error {

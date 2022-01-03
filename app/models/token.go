@@ -2,11 +2,15 @@ package models
 
 import (
 	"github.com/google/uuid"
-	"log"
-	"time"
-
 	"github.com/oleksandr-chornovol/lets-go-chat/database"
+	"time"
 )
+
+type TokenInterface interface {
+	CreateToken(token Token) (Token, error)
+	GetTokenById(id string) (Token, error)
+	IsEmpty() bool
+}
 
 type Token struct {
 	Id string
@@ -18,32 +22,26 @@ func (t Token) IsEmpty() bool {
 	return t == Token{}
 }
 
-func CreateToken(userId string) (string, error) {
-	token := map[string]string{
-		"id": uuid.New().String(),
-		"user_id": userId,
-		"expires_at": time.Now().Add(time.Minute).String(),
-	}
-	err := database.Driver.Insert("tokens", token)
+func (t Token) CreateToken(token Token) (Token, error) {
+	token.Id = uuid.New().String()
+	token.ExpiresAt = time.Now().Add(time.Minute).String()
 
-	return token["id"], err
+	attributes := map[string]string{
+		"id": token.Id,
+		"user_id": token.UserId,
+		"expires_at": token.ExpiresAt,
+	}
+	err := database.Driver.Insert("tokens", attributes)
+
+	return token, err
 }
 
-func GetTokenById(id string) (Token, error) {
-	var token Token
-
+func (t Token) GetTokenById(id string) (Token, error) {
 	whereAttributes := map[string]string{"id": id}
-	tokens, err := database.Driver.Select("tokens", whereAttributes)
-	if err != nil {
-		return token, err
-	}
+	result := database.Driver.SelectRow("tokens", whereAttributes)
 
-	for tokens.Next() {
-		err := tokens.Scan(&token.Id, &token.UserId, &token.ExpiresAt)
-		if err != nil {
-			log.Println(err)
-		}
-	}
+	var token Token
+	err := result.Scan(&token.Id, &token.UserId, &token.ExpiresAt)
 
-	return token, nil
+	return token, err
 }
