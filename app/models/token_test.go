@@ -2,11 +2,13 @@ package models
 
 import (
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/oleksandr-chornovol/lets-go-chat/database"
-	"github.com/oleksandr-chornovol/lets-go-chat/database/drivers"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/oleksandr-chornovol/lets-go-chat/database"
+	"github.com/oleksandr-chornovol/lets-go-chat/database/drivers"
+
 )
 
 func TestCreateToken(t *testing.T) {
@@ -18,8 +20,9 @@ func TestCreateToken(t *testing.T) {
 	dbMock.ExpectExec("insert into tokens").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
+	tokenModel := Token{}
 	userId := "user_id"
-	result, err := Token{}.CreateToken(Token{UserId: userId})
+	result, err := tokenModel.CreateToken(Token{UserId: userId})
 	assert.Nil(t, err)
 
 	err = dbMock.ExpectationsWereMet()
@@ -39,7 +42,8 @@ func TestGetTokenById(t *testing.T) {
 	dbMock.ExpectQuery("select * from tokens where id = ?").
 		WillReturnRows(sqlmock.NewRows(columns).AddRow(token.Id, token.UserId, token.ExpiresAt))
 
-	result, _ := Token{}.GetTokenById("token_id")
+	tokenModel := Token{}
+	result, _ := tokenModel.GetTokenById("token_id")
 	assert.Nil(t, err)
 
 	assert.Equal(t, token.Id, result.Id)

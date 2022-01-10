@@ -22,7 +22,7 @@ func (t Token) IsEmpty() bool {
 	return t == Token{}
 }
 
-func (t Token) CreateToken(token Token) (Token, error) {
+func (t *Token) CreateToken(token Token) (Token, error) {
 	token.Id = uuid.New().String()
 	token.ExpiresAt = time.Now().Add(time.Minute).String()
 
@@ -36,7 +36,7 @@ func (t Token) CreateToken(token Token) (Token, error) {
 	return token, err
 }
 
-func (t Token) GetTokenById(id string) (Token, error) {
+func (t *Token) GetTokenById(id string) (Token, error) {
 	whereAttributes := map[string]string{"id": id}
 	result := database.Driver.SelectRow("tokens", whereAttributes)
 

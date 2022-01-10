@@ -23,7 +23,7 @@ func (u User) IsEmpty() bool {
 	return u == User{}
 }
 
-func (u User) CreateUser(user User) (User, error) {
+func (u *User) CreateUser(user User) (User, error) {
 	user.Id = uuid.New().String()
 	user.Password, _ = hasher.HashPassword(user.Password)
 
@@ -37,7 +37,7 @@ func (u User) CreateUser(user User) (User, error) {
 	return user, err
 }
 
-func (u User) GetUserByField(field string, value string) (User, error) {
+func (u *User) GetUserByField(field string, value string) (User, error) {
 	whereAttributes := map[string]string{field: value}
 	result := database.Driver.SelectRow("users", whereAttributes)
 

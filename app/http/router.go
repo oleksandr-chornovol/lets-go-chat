@@ -19,13 +19,13 @@ type Route struct {
 
 func InitRoutes() {
 	userController := controllers.UserController {
-		TokenModel: models.Token{},
-		UserModel: models.User{},
+		TokenModel: &models.Token{},
+		UserModel: &models.User{},
 	}
 	chatController := controllers.ChatController {
 		ActiveUsersCache: cache.NewActiveUsersCache(),
-		TokenModel: models.Token{},
-		UserModel: models.User{},
+		TokenModel: &models.Token{},
+		UserModel: &models.User{},
 	}
 
 	router.Use(middleware.Logger)

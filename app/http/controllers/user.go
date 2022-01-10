@@ -15,7 +15,7 @@ type UserController struct {
 	UserModel models.UserInterface
 }
 
-func (uc UserController) Register(response http.ResponseWriter, request *http.Request) {
+func (c *UserController) Register(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
 	userData := getUserData(request)
 
@@ -25,7 +25,7 @@ func (uc UserController) Register(response http.ResponseWriter, request *http.Re
 		return
 	}
 
-	user, err := uc.UserModel.GetUserByField("name", userData.Name)
+	user, err := c.UserModel.GetUserByField("name", userData.Name)
 	if err != nil {
 		log.Println("GetUserByField failed, err:", err)
 		response.WriteHeader(http.StatusInternalServerError)
@@ -33,7 +33,7 @@ func (uc UserController) Register(response http.ResponseWriter, request *http.Re
 	}
 
 	if user.IsEmpty() {
-		user, err := uc.UserModel.CreateUser(userData)
+		user, err := c.UserModel.CreateUser(userData)
 		if err != nil {
 			log.Println("CreateUser failed, err:", err)
 			response.WriteHeader(http.StatusInternalServerError)
@@ -51,11 +51,11 @@ func (uc UserController) Register(response http.ResponseWriter, request *http.Re
 	}
 }
 
-func (uc UserController) Login(response http.ResponseWriter, request *http.Request) {
+func (c *UserController) Login(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
 
 	userData := getUserData(request)
-	user, err := uc.UserModel.GetUserByField("name", userData.Name)
+	user, err := c.UserModel.GetUserByField("name", userData.Name)
 	if err != nil {
 		log.Println("GetUserByField failed, err:", err)
 		response.WriteHeader(http.StatusInternalServerError)
@@ -64,7 +64,7 @@ func (uc UserController) Login(response http.ResponseWriter, request *http.Reque
 
 	if ! user.IsEmpty() {
 		if hasher.CheckPasswordHash(userData.Password, user.Password) {
-			token, err := uc.TokenModel.CreateToken(models.Token{UserId: user.Id})
+			token, err := c.TokenModel.CreateToken(models.Token{UserId: user.Id})
 			if err != nil {
 				log.Println("CreateToken failed, err:", err)
 				response.WriteHeader(http.StatusInternalServerError)

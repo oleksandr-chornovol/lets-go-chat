@@ -18,14 +18,14 @@ func NewActiveUsersCache() *ActiveUsersCache {
 	return c
 }
 
-func (c ActiveUsersCache) AddUser(user models.User) {
+func (c *ActiveUsersCache) AddUser(user models.User) {
 	c.users[user.Id] = user
 }
 
-func (c ActiveUsersCache) DeleteUser(userId string) {
+func (c *ActiveUsersCache) DeleteUser(userId string) {
 	delete(c.users, userId)
 }
 
-func (c ActiveUsersCache) GetAllUsers() map[string]models.User {
+func (c *ActiveUsersCache) GetAllUsers() map[string]models.User {
 	return c.users
 }

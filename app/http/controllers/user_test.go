@@ -2,13 +2,14 @@ package controllers
 
 import (
 	"errors"
-	"github.com/oleksandr-chornovol/lets-go-chat/app/models"
 	mocksmodels "github.com/oleksandr-chornovol/lets-go-chat/mocks/app/models"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/oleksandr-chornovol/lets-go-chat/app/models"
 )
 
 func TestRegister(t *testing.T) {
@@ -80,7 +81,7 @@ func TestRegister(t *testing.T) {
 			c.setupUserModelMock(userModelMock)
 
 			userController := UserController{
-				TokenModel: models.Token{},
+				TokenModel: &models.Token{},
 				UserModel:  userModelMock,
 			}
 

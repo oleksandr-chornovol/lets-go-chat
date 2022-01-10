@@ -3,8 +3,6 @@ package controllers
 import (
 	"errors"
 	"github.com/gorilla/websocket"
-	"github.com/oleksandr-chornovol/lets-go-chat/app/models"
-	"github.com/oleksandr-chornovol/lets-go-chat/cache"
 	mocksmodels "github.com/oleksandr-chornovol/lets-go-chat/mocks/app/models"
 	mockscache "github.com/oleksandr-chornovol/lets-go-chat/mocks/cache"
 	"github.com/stretchr/testify/assert"
@@ -13,6 +11,9 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/oleksandr-chornovol/lets-go-chat/app/models"
+	"github.com/oleksandr-chornovol/lets-go-chat/cache"
 )
 
 func TestStartEcho(t *testing.T) {
@@ -65,14 +66,6 @@ func TestStartEchoNegativeCases(t *testing.T) {
 		expectedResponseBody string
 		setupTokenModelMock func(tokenModelMock *mocksmodels.TokenInterface)
 	}{
-		"error in GetTokenById": {
-			expectedResponseCode: http.StatusInternalServerError,
-			expectedResponseBody: "",
-			setupTokenModelMock: func(tokenModelMock *mocksmodels.TokenInterface) {
-				tokenModelMock.On("GetTokenById", "token_id").
-					Return(models.Token{}, errors.New("cannot get token"))
-			},
-		},
 		"token is expired": {
 			expectedResponseCode: http.StatusBadRequest,
 			expectedResponseBody: "Token is expired.",
@@ -91,6 +84,14 @@ func TestStartEchoNegativeCases(t *testing.T) {
 					Return(models.Token{}, nil)
 			},
 		},
+		"error in GetTokenById": {
+			expectedResponseCode: http.StatusInternalServerError,
+			expectedResponseBody: "",
+			setupTokenModelMock: func(tokenModelMock *mocksmodels.TokenInterface) {
+				tokenModelMock.On("GetTokenById", "token_id").
+					Return(models.Token{}, errors.New("cannot get token"))
+			},
+		},
 	}
 
 	for caseName, c := range cases {
@@ -103,8 +104,8 @@ func TestStartEchoNegativeCases(t *testing.T) {
 
 			chatController := ChatController{
 				ActiveUsersCache: cache.NewActiveUsersCache(),
-				TokenModel:       tokenModelMock,
-				UserModel:        models.User{},
+				TokenModel: tokenModelMock,
+				UserModel: &models.User{},
 			}
 
 			response := httptest.NewRecorder()
@@ -129,8 +130,8 @@ func TestGetActiveUsersCount(t *testing.T) {
 
 	chatController := ChatController {
 		ActiveUsersCache: activeUsersCacheMock,
-		TokenModel: models.Token{},
-		UserModel: models.User{},
+		TokenModel: &models.Token{},
+		UserModel: &models.User{},
 	}
 
 	response := httptest.NewRecorder()

@@ -1,9 +1,10 @@
 package cache
 
 import (
-	"github.com/oleksandr-chornovol/lets-go-chat/app/models"
 	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/oleksandr-chornovol/lets-go-chat/app/models"
 )
 
 func TestAddUser(t *testing.T) {

@@ -2,10 +2,11 @@ package models
 
 import (
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/oleksandr-chornovol/lets-go-chat/database"
-	"github.com/oleksandr-chornovol/lets-go-chat/database/drivers"
 	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/oleksandr-chornovol/lets-go-chat/database"
+	"github.com/oleksandr-chornovol/lets-go-chat/database/drivers"
 )
 
 func TestCreateUser(t *testing.T) {
@@ -17,7 +18,8 @@ func TestCreateUser(t *testing.T) {
 	dbMock.ExpectExec("insert into users").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
-	result, err := User{}.CreateUser(User{Name: "user_name", Password: "user_password"})
+	userModel := User{}
+	result, err := userModel.CreateUser(User{Name: "user_name", Password: "user_password"})
 	assert.Nil(t, err)
 
 	err = dbMock.ExpectationsWereMet()
@@ -37,7 +39,8 @@ func TestGetUserByField(t *testing.T) {
 	dbMock.ExpectQuery("select * from users where name = ?").
 		WillReturnRows(sqlmock.NewRows(columns).AddRow(user.Id, user.Name, user.Password))
 
-	result, _ := User{}.GetUserByField("name", user.Name)
+	userModel := User{}
+	result, _ := userModel.GetUserByField("name", user.Name)
 
 	err = dbMock.ExpectationsWereMet()
 	assert.Nil(t, err)
