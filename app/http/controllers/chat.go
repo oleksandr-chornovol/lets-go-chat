@@ -12,10 +12,16 @@ import (
 	"github.com/oleksandr-chornovol/lets-go-chat/cache"
 )
 
-func StartEcho(response http.ResponseWriter, request *http.Request) {
+type ChatController struct {
+	ActiveUsersCache cache.ActiveUsersCacheInterface
+	TokenModel models.TokenInterface
+	UserModel models.UserInterface
+}
+
+func (c *ChatController) StartEcho(response http.ResponseWriter, request *http.Request) {
 	tokenId := request.URL.Query().Get("token")
 
-	token, err := models.GetTokenById(tokenId)
+	token, err := c.TokenModel.GetTokenById(tokenId)
 	if err != nil {
 		log.Println("GetTokenById failed, err:", err)
 		response.WriteHeader(http.StatusInternalServerError)
@@ -24,17 +30,23 @@ func StartEcho(response http.ResponseWriter, request *http.Request) {
 
 	if ! token.IsEmpty() {
 		if time.Now().String() < token.ExpiresAt {
-			upgrader := websocket.Upgrader{}
-			conn, err := upgrader.Upgrade(response, request, nil)
+			wsUpgrader := websocket.Upgrader{}
+			conn, err := wsUpgrader.Upgrade(response, request, nil)
 			if err != nil {
-				log.Print("upgrade failed: ", err)
+				log.Println("Websocket Upgrade failed, err:", err)
+				response.WriteHeader(http.StatusInternalServerError)
 				return
 			}
 			defer conn.Close()
 
-			user, _ := models.GetUserById(token.UserId)
-			cache.AddUser(user)
-			defer cache.DeleteUser(user.Id)
+			user, err := c.UserModel.GetUserByField("id", token.UserId)
+			if err != nil {
+				log.Println("GetUserByField failed, err:", err)
+				response.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			c.ActiveUsersCache.AddUser(user)
+			defer c.ActiveUsersCache.DeleteUser(user.Id)
 
 			for {
 				mt, message, err := conn.ReadMessage()
@@ -55,9 +67,9 @@ func StartEcho(response http.ResponseWriter, request *http.Request) {
 	}
 }
 
-func GetActiveUsersCount(response http.ResponseWriter, request *http.Request) {
+func (c *ChatController) GetActiveUsersCount(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(response).Encode(map[string]int {
-		"count_of_users": len(cache.GetAllUsers()),
+		"count_of_users": len(c.ActiveUsersCache.GetAllUsers()),
 	})
 }

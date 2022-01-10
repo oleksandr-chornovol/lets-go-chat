@@ -31,8 +31,12 @@ func Init() {
 
 	switch dbConfig["driver"] {
 	case "mysql":
-		Driver = drivers.MySqlDriver{DB: db}
+		SetDriver(drivers.MySqlDriver{DB: db})
 	}
+}
+
+func SetDriver(driver drivers.DBDriverInterface) {
+	Driver = driver
 }
 
 func Migrate() {
