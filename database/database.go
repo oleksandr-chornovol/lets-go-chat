@@ -22,15 +22,14 @@ var migrations = []string {
 }
 
 func Init() {
-	dbConfig := config.LocalDBConfig
-	database, err := sql.Open(dbConfig["driver"], dbConfig["url"])
+	database, err := sql.Open(config.Get("db_driver"), config.Get("db_url"))
 	if err != nil {
 		log.Println(err)
 	}
 
 	db = database
 
-	switch dbConfig["driver"] {
+	switch config.Get("db_driver") {
 	case "mysql":
 		SetDriver(drivers.MySqlDriver{DB: db})
 	}
