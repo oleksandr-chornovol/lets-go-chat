@@ -4,7 +4,8 @@ import "database/sql"
 
 type DBDriverInterface interface {
 	Insert(table string, attributes map[string]string) error
-	SelectRow(table string, attributes map[string]string) *sql.Row
-	//Update(table string, attributes map[string]string)
+	Select(table string, attributes [][3]string) (*sql.Rows, error)
+	SelectRow(table string, attributes [][3]string) *sql.Row
+	Update(table string, whereAttributes map[string]string, updateAttributes map[string]string) error
 	//Delete(table string, attributes map[string]string)
 }

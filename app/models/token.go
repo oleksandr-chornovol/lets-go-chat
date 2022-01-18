@@ -9,17 +9,12 @@ import (
 type TokenInterface interface {
 	CreateToken(token Token) (Token, error)
 	GetTokenById(id string) (Token, error)
-	IsEmpty() bool
 }
 
 type Token struct {
 	Id string
 	UserId string
 	ExpiresAt string
-}
-
-func (t Token) IsEmpty() bool {
-	return t == Token{}
 }
 
 func (t *Token) CreateToken(token Token) (Token, error) {
@@ -37,7 +32,9 @@ func (t *Token) CreateToken(token Token) (Token, error) {
 }
 
 func (t *Token) GetTokenById(id string) (Token, error) {
-	whereAttributes := map[string]string{"id": id}
+	var whereAttributes = [][3]string{
+		{"id", "=", id},
+	}
 	result := database.Driver.SelectRow("tokens", whereAttributes)
 
 	var token Token

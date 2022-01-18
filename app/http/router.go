@@ -24,6 +24,7 @@ func InitRoutes() {
 	}
 	chatController := controllers.ChatController {
 		ActiveUsersCache: cache.NewActiveUsersCache(),
+		MessageModel: &models.Message{},
 		TokenModel: &models.Token{},
 		UserModel: &models.User{},
 	}
@@ -34,5 +35,5 @@ func InitRoutes() {
 	router.Post("/v1/user", userController.Register)
 	router.Post("/v1/user/login", userController.Login)
 	router.Get("/v1/user/active", chatController.GetActiveUsersCount)
-	router.Get("/v1/chat", chatController.StartEcho)
+	router.Get("/v1/chat", chatController.StartChat)
 }
