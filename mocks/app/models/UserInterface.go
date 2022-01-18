@@ -54,16 +54,23 @@ func (_m *UserInterface) GetUserByField(field string, value string) (models.User
 	return r0, r1
 }
 
-// IsEmpty provides a mock function with given fields:
-func (_m *UserInterface) IsEmpty() bool {
-	ret := _m.Called()
+// UpdateUser provides a mock function with given fields: user
+func (_m *UserInterface) UpdateUser(user models.User) (models.User, error) {
+	ret := _m.Called(user)
 
-	var r0 bool
-	if rf, ok := ret.Get(0).(func() bool); ok {
-		r0 = rf()
+	var r0 models.User
+	if rf, ok := ret.Get(0).(func(models.User) models.User); ok {
+		r0 = rf(user)
 	} else {
-		r0 = ret.Get(0).(bool)
+		r0 = ret.Get(0).(models.User)
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := ret.Get(1).(func(models.User) error); ok {
+		r1 = rf(user)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }

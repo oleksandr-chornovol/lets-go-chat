@@ -49,9 +49,3 @@ func TestGetUserByField(t *testing.T) {
 	assert.Equal(t, user.Name, result.Name)
 	assert.Equal(t, user.Password, result.Password)
 }
-
-func TestUserIsEmpty(t *testing.T) {
-	result := User{}.IsEmpty()
-
-	assert.Equal(t, true, result)
-}

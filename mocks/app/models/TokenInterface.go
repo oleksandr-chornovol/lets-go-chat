@@ -53,17 +53,3 @@ func (_m *TokenInterface) GetTokenById(id string) (models.Token, error) {
 
 	return r0, r1
 }
-
-// IsEmpty provides a mock function with given fields:
-func (_m *TokenInterface) IsEmpty() bool {
-	ret := _m.Called()
-
-	var r0 bool
-	if rf, ok := ret.Get(0).(func() bool); ok {
-		r0 = rf()
-	} else {
-		r0 = ret.Get(0).(bool)
-	}
-
-	return r0
-}

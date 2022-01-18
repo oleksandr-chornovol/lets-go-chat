@@ -50,9 +50,3 @@ func TestGetTokenById(t *testing.T) {
 	assert.Equal(t, token.UserId, result.UserId)
 	assert.Equal(t, token.ExpiresAt, result.ExpiresAt)
 }
-
-func TestTokenIsEmpty(t *testing.T) {
-	result := Token{}.IsEmpty()
-
-	assert.Equal(t, true, result)
-}
