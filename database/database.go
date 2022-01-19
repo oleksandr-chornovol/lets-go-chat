@@ -29,6 +29,7 @@ func Init() {
 
 	db = database
 
+	log.Println(config.Get("db_url"))
 	switch config.Get("db_driver") {
 	case "mysql":
 		SetDriver(drivers.MySqlDriver{DB: db})
