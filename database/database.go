@@ -27,7 +27,7 @@ func Init() {
 		log.Println(err)
 	}
 
-	err = db.Ping()
+	err = database.Ping()
 	if err != nil {
 		panic(err)
 	}
