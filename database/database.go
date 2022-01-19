@@ -27,6 +27,11 @@ func Init() {
 		log.Println(err)
 	}
 
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
+
 	db = database
 
 	log.Println("!!!DB_URL!!!", config.Get("db_url"))

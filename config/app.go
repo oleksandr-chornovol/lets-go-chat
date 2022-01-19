@@ -11,8 +11,7 @@ var app = map[string]map[string]string{
 	"heroku": {
 		"port": os.Getenv("PORT"),
 		"db_driver": "mysql",
-		//"db_url": os.Getenv("CLEARDB_DATABASE_URL"),
-		"db_url": "b733c72e090730:5245eefd@eu-cdbr-west-02.cleardb.net/heroku_187154ebea373f1",
+		"db_url": os.Getenv("CLEARDB_DATABASE_URL"),
 	},
 }
 
