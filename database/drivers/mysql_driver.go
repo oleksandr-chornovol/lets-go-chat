@@ -2,6 +2,7 @@ package drivers
 
 import (
 	"database/sql"
+	"log"
 )
 
 type MySqlDriver struct {
@@ -17,6 +18,8 @@ func (d MySqlDriver) Select(table string, attributes [][3]string) (*sql.Rows, er
 func (d MySqlDriver) SelectRow(table string, attributes [][3]string) *sql.Row {
 	query, values := getSelectQuery(table, attributes)
 
+	log.Println("function SelectRow q", query)
+	log.Println("function SelectRow v", values)
 	return d.DB.QueryRow(query, values...)
 }
 
