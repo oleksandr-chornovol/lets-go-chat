@@ -79,7 +79,7 @@ func TestStartChatNegativeCases(t *testing.T) {
 			expectedResponseBody: "Token does not exist.",
 			setupTokenModelMock: func(tokenModelMock *mocksmodels.TokenInterface) {
 				tokenModelMock.On("GetTokenById", "token_id").
-					Return(models.Token{}, nil)
+					Return(models.Token{}, errors.New("sql: no rows in result set"))
 			},
 		},
 		"error in GetTokenById": {

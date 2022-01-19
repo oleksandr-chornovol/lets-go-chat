@@ -43,7 +43,10 @@ func TestGetTokenById(t *testing.T) {
 		WillReturnRows(sqlmock.NewRows(columns).AddRow(token.Id, token.UserId, token.ExpiresAt))
 
 	tokenModel := Token{}
-	result, _ := tokenModel.GetTokenById("token_id")
+	result, err := tokenModel.GetTokenById("token_id")
+	assert.Nil(t, err)
+
+	err = dbMock.ExpectationsWereMet()
 	assert.Nil(t, err)
 
 	assert.Equal(t, token.Id, result.Id)

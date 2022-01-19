@@ -25,7 +25,7 @@ func TestRegister(t *testing.T) {
 			expectedResponseBody: `{"id":"user_id","name":"name"}` + "\n",
 			setupUserModelMock: func(userModelMock *mocksmodels.UserInterface) {
 				userModelMock.On("GetUserByField", "name", "name").
-					Return(models.User{}, nil)
+					Return(models.User{}, errors.New("sql: no rows in result set"))
 				createUserArgument := models.User{Name: "name", Password: "password"}
 				createUserResult := models.User{Id: "user_id", Name: "name", Password: "password"}
 				userModelMock.On("CreateUser", createUserArgument).
@@ -63,7 +63,7 @@ func TestRegister(t *testing.T) {
 			expectedResponseBody: "",
 			setupUserModelMock: func(userModelMock *mocksmodels.UserInterface) {
 				userModelMock.On("GetUserByField", "name", "name").
-					Return(models.User{}, nil)
+					Return(models.User{}, errors.New("sql: no rows in result set"))
 				createUserArgument := models.User{Name: "name", Password: "password"}
 				createUserResult := models.User{Id: "user_id", Name: "name", Password: "password"}
 				userModelMock.On("CreateUser", createUserArgument).
@@ -134,7 +134,7 @@ func TestLogin(t *testing.T) {
 			expectedResponseBody: "User does not exist.",
 			setupUserModelMock: func(userModelMock *mocksmodels.UserInterface) {
 				userModelMock.On("GetUserByField", "name", "name").
-					Return(models.User{}, nil)
+					Return(models.User{}, errors.New("sql: no rows in result set"))
 			},
 			setupTokenModelMock: func(tokenModelMock *mocksmodels.TokenInterface) {},
 		},
