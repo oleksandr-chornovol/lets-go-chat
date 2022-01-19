@@ -10,6 +10,7 @@ import (
 
 	"github.com/oleksandr-chornovol/lets-go-chat/app/models"
 	"github.com/oleksandr-chornovol/lets-go-chat/cache"
+	"github.com/oleksandr-chornovol/lets-go-chat/config"
 )
 
 type ChatController struct {
@@ -115,6 +116,7 @@ func (c *ChatController) EndUserSession(user models.User) {
 }
 
 func (c *ChatController) GetActiveUsersCount(response http.ResponseWriter, request *http.Request) {
+	log.Println("!!!DB_URL!!!", config.Get("db_url"))
 	response.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(response).Encode(map[string]int {
 		"count_of_users": len(c.ActiveUsersCache.GetAllUsers()),
