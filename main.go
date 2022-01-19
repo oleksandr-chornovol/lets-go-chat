@@ -7,7 +7,7 @@ import (
 
 func main() {
 	database.Init()
-	//database.Migrate()
+	database.Migrate()
 	http.InitRoutes()
 	http.StartServer()
 }
