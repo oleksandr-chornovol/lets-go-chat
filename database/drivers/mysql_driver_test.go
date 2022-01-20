@@ -17,10 +17,10 @@ func TestSelectRow(t *testing.T) {
 	dbMock.ExpectQuery("select * from entities where id = ?").
 		WillReturnRows(sqlmock.NewRows(columns).AddRow("id_value", name))
 
-	result := mySqlDriver.SelectRow("entities", map[string]string{"id": "id_value"})
+	result := mySqlDriver.SelectRow("entities", [][3]string{{"id", "=", "id_value"}})
 
 	var entity struct {
-		Id string
+		Id   string
 		Name string
 	}
 	err = result.Scan(&entity.Id, &entity.Name)
@@ -42,4 +42,3 @@ func TestInsert(t *testing.T) {
 	err = mySqlDriver.Insert("entities", map[string]string{"id": "id_value"})
 	assert.Nil(t, err)
 }
-

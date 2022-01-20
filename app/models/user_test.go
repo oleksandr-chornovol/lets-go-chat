@@ -4,6 +4,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"time"
 
 	"github.com/oleksandr-chornovol/lets-go-chat/database"
 	"github.com/oleksandr-chornovol/lets-go-chat/database/drivers"
@@ -34,13 +35,14 @@ func TestGetUserByField(t *testing.T) {
 	defer db.Close()
 	database.SetDriver(drivers.MySqlDriver{DB: db})
 
-	columns := []string{"id", "name", "password"}
-	user := User{Id: "user_id", Name: "user_name", Password: "hashed_password"}
+	columns := []string{"id", "name", "password", "last_session_end"}
+	user := User{Id: "user_id", Name: "user_name", Password: "hashed_password", LastSessionEnd: time.Now().Add(-time.Minute).String()}
 	dbMock.ExpectQuery("select * from users where name = ?").
-		WillReturnRows(sqlmock.NewRows(columns).AddRow(user.Id, user.Name, user.Password))
+		WillReturnRows(sqlmock.NewRows(columns).AddRow(user.Id, user.Name, user.Password, user.LastSessionEnd))
 
 	userModel := User{}
-	result, _ := userModel.GetUserByField("name", user.Name)
+	result, err := userModel.GetUserByField("name", user.Name)
+	assert.Nil(t, err)
 
 	err = dbMock.ExpectationsWereMet()
 	assert.Nil(t, err)
@@ -48,10 +50,5 @@ func TestGetUserByField(t *testing.T) {
 	assert.Equal(t, user.Id, result.Id)
 	assert.Equal(t, user.Name, result.Name)
 	assert.Equal(t, user.Password, result.Password)
-}
-
-func TestUserIsEmpty(t *testing.T) {
-	result := User{}.IsEmpty()
-
-	assert.Equal(t, true, result)
+	assert.Equal(t, user.LastSessionEnd, result.LastSessionEnd)
 }

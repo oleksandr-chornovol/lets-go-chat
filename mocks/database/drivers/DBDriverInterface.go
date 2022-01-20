@@ -27,17 +27,54 @@ func (_m *DBDriverInterface) Insert(table string, attributes map[string]string) 
 	return r0
 }
 
+// Select provides a mock function with given fields: table, attributes
+func (_m *DBDriverInterface) Select(table string, attributes [][3]string) (*sql.Rows, error) {
+	ret := _m.Called(table, attributes)
+
+	var r0 *sql.Rows
+	if rf, ok := ret.Get(0).(func(string, [][3]string) *sql.Rows); ok {
+		r0 = rf(table, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*sql.Rows)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string, [][3]string) error); ok {
+		r1 = rf(table, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // SelectRow provides a mock function with given fields: table, attributes
-func (_m *DBDriverInterface) SelectRow(table string, attributes map[string]string) *sql.Row {
+func (_m *DBDriverInterface) SelectRow(table string, attributes [][3]string) *sql.Row {
 	ret := _m.Called(table, attributes)
 
 	var r0 *sql.Row
-	if rf, ok := ret.Get(0).(func(string, map[string]string) *sql.Row); ok {
+	if rf, ok := ret.Get(0).(func(string, [][3]string) *sql.Row); ok {
 		r0 = rf(table, attributes)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*sql.Row)
 		}
+	}
+
+	return r0
+}
+
+// Update provides a mock function with given fields: table, whereAttributes, updateAttributes
+func (_m *DBDriverInterface) Update(table string, whereAttributes map[string]string, updateAttributes map[string]string) error {
+	ret := _m.Called(table, whereAttributes, updateAttributes)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, map[string]string, map[string]string) error); ok {
+		r0 = rf(table, whereAttributes, updateAttributes)
+	} else {
+		r0 = ret.Error(0)
 	}
 
 	return r0

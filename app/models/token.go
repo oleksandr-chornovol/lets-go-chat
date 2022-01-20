@@ -9,26 +9,21 @@ import (
 type TokenInterface interface {
 	CreateToken(token Token) (Token, error)
 	GetTokenById(id string) (Token, error)
-	IsEmpty() bool
 }
 
 type Token struct {
-	Id string
-	UserId string
+	Id        string
+	UserId    string
 	ExpiresAt string
-}
-
-func (t Token) IsEmpty() bool {
-	return t == Token{}
 }
 
 func (t *Token) CreateToken(token Token) (Token, error) {
 	token.Id = uuid.New().String()
-	token.ExpiresAt = time.Now().Add(time.Minute).String()
+	token.ExpiresAt = time.Now().Add(time.Hour).String()
 
 	attributes := map[string]string{
-		"id": token.Id,
-		"user_id": token.UserId,
+		"id":         token.Id,
+		"user_id":    token.UserId,
 		"expires_at": token.ExpiresAt,
 	}
 	err := database.Driver.Insert("tokens", attributes)
@@ -37,7 +32,9 @@ func (t *Token) CreateToken(token Token) (Token, error) {
 }
 
 func (t *Token) GetTokenById(id string) (Token, error) {
-	whereAttributes := map[string]string{"id": id}
+	var whereAttributes = [][3]string{
+		{"id", "=", id},
+	}
 	result := database.Driver.SelectRow("tokens", whereAttributes)
 
 	var token Token

@@ -7,15 +7,15 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: 1.0.0
 servers:
-- url: https://lets-go-chat-chornovol.herokuapp.com/v1
+  - url: https://lets-go-chat-chornovol.herokuapp.com/v1
 tags:
-- name: user
-  description: Operations about user
+  - name: user
+    description: Operations about user
 paths:
   /user:
     post:
       tags:
-      - user
+        - user
       summary: Register (create) user
       operationId: createUser
       requestBody:
@@ -34,15 +34,15 @@ paths:
                 $ref: '#/components/schemas/CreateUserResponse'
         400:
           description: Bad request, empty username or id
-          content: {}
+          content: { }
         500:
           description: Internal Server Error
-          content: {}
+          content: { }
       x-codegen-request-body-name: body
   /user/login:
     post:
       tags:
-      - user
+        - user
       summary: Logs user into the system
       operationId: loginUser
       requestBody:
@@ -72,16 +72,16 @@ paths:
                 $ref: '#/components/schemas/LoginUserResonse'
         400:
           description: Invalid username/password
-          content: {}
+          content: { }
         500:
           description: Internal Server Error
-          content: {}
+          content: { }
 components:
   schemas:
     LoginUserRequest:
       required:
-      - password
-      - userName
+        - password
+        - userName
       type: object
       properties:
         name:
@@ -92,7 +92,7 @@ components:
           description: The password for login in clear text
     LoginUserResonse:
       required:
-      - url
+        - url
       type: object
       properties:
         url:
@@ -101,8 +101,8 @@ components:
           example: ws://fancy-chat.io/ws&token=one-time-token
     CreateUserRequest:
       required:
-      - password
-      - userName
+        - password
+        - userName
       type: object
       properties:
         name:

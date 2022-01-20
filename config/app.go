@@ -2,14 +2,23 @@ package config
 
 import "os"
 
-var LocalDBConfig = map[string]string {
-	"driver": "mysql",
-	"url": "root:root@/lets-go-chat",
+var app = map[string]map[string]string{
+	"local": {
+		"port":      "8080",
+		"db_driver": "mysql",
+		"db_url":    "root:root@/lets-go-chat",
+	},
+	"heroku": {
+		"port":      os.Getenv("PORT"),
+		"db_driver": "mysql",
+		"db_url":    os.Getenv("DATABASE_URL"),
+	},
 }
 
-var HerokuDBConfig = map[string]string {
-	"driver": "mysql",
-	"url": os.Getenv("DATABASE_URL"),
+func Get(parameter string) string {
+	if os.Getenv("PORT") == "" {
+		return app["local"][parameter]
+	} else {
+		return app["heroku"][parameter]
+	}
 }
-
-var LocalPort = "8080"
