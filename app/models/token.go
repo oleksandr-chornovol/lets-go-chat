@@ -12,18 +12,18 @@ type TokenInterface interface {
 }
 
 type Token struct {
-	Id string
-	UserId string
+	Id        string
+	UserId    string
 	ExpiresAt string
 }
 
 func (t *Token) CreateToken(token Token) (Token, error) {
 	token.Id = uuid.New().String()
-	token.ExpiresAt = time.Now().Add(time.Minute).String()
+	token.ExpiresAt = time.Now().Add(time.Hour).String()
 
 	attributes := map[string]string{
-		"id": token.Id,
-		"user_id": token.UserId,
+		"id":         token.Id,
+		"user_id":    token.UserId,
 		"expires_at": token.ExpiresAt,
 	}
 	err := database.Driver.Insert("tokens", attributes)

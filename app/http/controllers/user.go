@@ -12,7 +12,7 @@ import (
 
 type UserController struct {
 	TokenModel models.TokenInterface
-	UserModel models.UserInterface
+	UserModel  models.UserInterface
 }
 
 func (c *UserController) Register(response http.ResponseWriter, request *http.Request) {
@@ -77,7 +77,7 @@ func (c *UserController) Login(response http.ResponseWriter, request *http.Reque
 			return
 		}
 
-		json.NewEncoder(response).Encode(map[string]string {
+		json.NewEncoder(response).Encode(map[string]string{
 			"url": "ws://" + request.Host + "/v1/chat?token=" + token.Id,
 		})
 	} else {

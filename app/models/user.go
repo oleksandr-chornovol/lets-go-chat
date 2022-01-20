@@ -15,11 +15,11 @@ type UserInterface interface {
 }
 
 type User struct {
-	Id string
-	Name string
-	Password string
+	Id             string
+	Name           string
+	Password       string
 	LastSessionEnd string
-	Connection *websocket.Conn
+	Connection     *websocket.Conn
 }
 
 func (u *User) CreateUser(user User) (User, error) {
@@ -27,8 +27,8 @@ func (u *User) CreateUser(user User) (User, error) {
 	user.Password, _ = hasher.HashPassword(user.Password)
 
 	attributes := map[string]string{
-		"id": user.Id,
-		"name": user.Name,
+		"id":       user.Id,
+		"name":     user.Name,
 		"password": user.Password,
 	}
 	err := database.Driver.Insert("users", attributes)
@@ -48,14 +48,14 @@ func (u *User) GetUserByField(field string, value string) (User, error) {
 	return user, err
 }
 
-func(u *User) UpdateUser(user User) (User, error) {
+func (u *User) UpdateUser(user User) (User, error) {
 	whereAttributes := map[string]string{
 		"id": user.Id,
 	}
 
 	updateAttributes := map[string]string{
-		"name": user.Name,
-		"password": user.Password,
+		"name":             user.Name,
+		"password":         user.Password,
 		"last_session_end": user.LastSessionEnd,
 	}
 

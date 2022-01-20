@@ -1,6 +1,9 @@
 package cache
 
-import "github.com/oleksandr-chornovol/lets-go-chat/app/models"
+import (
+	"github.com/oleksandr-chornovol/lets-go-chat/app/models"
+	"log"
+)
 
 type ActiveUsersCacheInterface interface {
 	AddUser(user models.User)
@@ -13,12 +16,13 @@ type ActiveUsersCache struct {
 }
 
 func NewActiveUsersCache() *ActiveUsersCache {
-	c := new(ActiveUsersCache)
-	c.users = make(map[string]models.User)
-	return c
+	return &ActiveUsersCache{
+		users: make(map[string]models.User),
+	}
 }
 
 func (c *ActiveUsersCache) AddUser(user models.User) {
+	log.Println("AddUser", user)
 	c.users[user.Id] = user
 }
 

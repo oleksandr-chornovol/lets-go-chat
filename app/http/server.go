@@ -8,7 +8,7 @@ import (
 )
 
 func StartServer() {
-	err := http.ListenAndServe(":" + config.Get("port"), router)
+	err := http.ListenAndServe(":"+config.Get("port"), router)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}

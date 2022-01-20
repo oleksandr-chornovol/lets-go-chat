@@ -31,11 +31,11 @@ func (d MySqlDriver) Insert(table string, attributes map[string]string) error {
 		valuesPlaceholders += "?, "
 		values = append(values, value)
 	}
-	columns = columns[:len(columns) - 2]
-	valuesPlaceholders = valuesPlaceholders[:len(valuesPlaceholders) - 2]
+	columns = columns[:len(columns)-2]
+	valuesPlaceholders = valuesPlaceholders[:len(valuesPlaceholders)-2]
 	query += columns + ") values (" + valuesPlaceholders + ")"
 
-	_, err :=  d.DB.Exec(query, values...)
+	_, err := d.DB.Exec(query, values...)
 
 	return err
 }
@@ -48,15 +48,15 @@ func (d MySqlDriver) Update(table string, whereAttributes map[string]string, upd
 		query += column + " = ?, "
 		values = append(values, value)
 	}
-	query = query[:len(query) - 2] + " where "
+	query = query[:len(query)-2] + " where "
 
 	for column, value := range whereAttributes {
 		query += column + " = ?, "
 		values = append(values, value)
 	}
-	query = query[:len(query) - 2]
+	query = query[:len(query)-2]
 
-	_, err :=  d.DB.Exec(query, values...)
+	_, err := d.DB.Exec(query, values...)
 
 	return err
 }
@@ -71,7 +71,7 @@ func getSelectQuery(table string, attributes [][3]string) (string, []interface{}
 			query += attribute[0] + " " + attribute[1] + " ?,"
 			values = append(values, attribute[2])
 		}
-		query = query[:len(query) - 1]
+		query = query[:len(query)-1]
 	}
 
 	return query, values

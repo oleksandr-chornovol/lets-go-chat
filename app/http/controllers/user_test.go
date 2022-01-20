@@ -14,13 +14,13 @@ import (
 
 func TestRegister(t *testing.T) {
 	cases := map[string]struct {
-		requestBody *strings.Reader
+		requestBody          *strings.Reader
 		expectedResponseCode int
 		expectedResponseBody string
-		setupUserModelMock func(userModelMock *mocksmodels.UserInterface)
+		setupUserModelMock   func(userModelMock *mocksmodels.UserInterface)
 	}{
 		"success registration": {
-			requestBody: strings.NewReader(`{"name":"name","password":"password"}`),
+			requestBody:          strings.NewReader(`{"name":"name","password":"password"}`),
 			expectedResponseCode: http.StatusCreated,
 			expectedResponseBody: `{"id":"user_id","name":"name"}` + "\n",
 			setupUserModelMock: func(userModelMock *mocksmodels.UserInterface) {
@@ -33,13 +33,13 @@ func TestRegister(t *testing.T) {
 			},
 		},
 		"invalid data": {
-			requestBody: strings.NewReader(`{"name":"","password":""}`),
+			requestBody:          strings.NewReader(`{"name":"","password":""}`),
 			expectedResponseCode: http.StatusBadRequest,
 			expectedResponseBody: "Request data is invalid.",
-			setupUserModelMock: func(userModelMock *mocksmodels.UserInterface) {},
+			setupUserModelMock:   func(userModelMock *mocksmodels.UserInterface) {},
 		},
 		"name is already taken": {
-			requestBody: strings.NewReader(`{"name":"name","password":"password"}`),
+			requestBody:          strings.NewReader(`{"name":"name","password":"password"}`),
 			expectedResponseCode: http.StatusConflict,
 			expectedResponseBody: "Name is already taken.",
 			setupUserModelMock: func(userModelMock *mocksmodels.UserInterface) {
@@ -49,7 +49,7 @@ func TestRegister(t *testing.T) {
 			},
 		},
 		"error in GetUserByField": {
-			requestBody: strings.NewReader(`{"name":"name","password":"password"}`),
+			requestBody:          strings.NewReader(`{"name":"name","password":"password"}`),
 			expectedResponseCode: http.StatusInternalServerError,
 			expectedResponseBody: "",
 			setupUserModelMock: func(userModelMock *mocksmodels.UserInterface) {
@@ -58,7 +58,7 @@ func TestRegister(t *testing.T) {
 			},
 		},
 		"error in CreateUser": {
-			requestBody: strings.NewReader(`{"name":"name","password":"password"}`),
+			requestBody:          strings.NewReader(`{"name":"name","password":"password"}`),
 			expectedResponseCode: http.StatusInternalServerError,
 			expectedResponseBody: "",
 			setupUserModelMock: func(userModelMock *mocksmodels.UserInterface) {
@@ -97,14 +97,14 @@ func TestRegister(t *testing.T) {
 
 func TestLogin(t *testing.T) {
 	cases := map[string]struct {
-		requestBody *strings.Reader
+		requestBody          *strings.Reader
 		expectedResponseCode int
 		expectedResponseBody string
-		setupUserModelMock func(userModelMock *mocksmodels.UserInterface)
-		setupTokenModelMock func(tokenModelMock *mocksmodels.TokenInterface)
+		setupUserModelMock   func(userModelMock *mocksmodels.UserInterface)
+		setupTokenModelMock  func(tokenModelMock *mocksmodels.TokenInterface)
 	}{
 		"success login": {
-			requestBody: strings.NewReader(`{"name":"name","password":"password"}`),
+			requestBody:          strings.NewReader(`{"name":"name","password":"password"}`),
 			expectedResponseCode: http.StatusOK,
 			expectedResponseBody: `{"url":"ws:///v1/chat?token=token_id"}` + "\n",
 			setupUserModelMock: func(userModelMock *mocksmodels.UserInterface) {
@@ -118,7 +118,7 @@ func TestLogin(t *testing.T) {
 			},
 		},
 		"incorrect password": {
-			requestBody: strings.NewReader(`{"name":"name","password":"incorrect_password"}`),
+			requestBody:          strings.NewReader(`{"name":"name","password":"incorrect_password"}`),
 			expectedResponseCode: http.StatusUnauthorized,
 			expectedResponseBody: "Password is incorrect.",
 			setupUserModelMock: func(userModelMock *mocksmodels.UserInterface) {
@@ -129,7 +129,7 @@ func TestLogin(t *testing.T) {
 			setupTokenModelMock: func(tokenModelMock *mocksmodels.TokenInterface) {},
 		},
 		"user does not exist": {
-			requestBody: strings.NewReader(`{"name":"name","password":"incorrect_password"}`),
+			requestBody:          strings.NewReader(`{"name":"name","password":"incorrect_password"}`),
 			expectedResponseCode: http.StatusUnauthorized,
 			expectedResponseBody: "User does not exist.",
 			setupUserModelMock: func(userModelMock *mocksmodels.UserInterface) {
@@ -139,7 +139,7 @@ func TestLogin(t *testing.T) {
 			setupTokenModelMock: func(tokenModelMock *mocksmodels.TokenInterface) {},
 		},
 		"error in GetUserByField": {
-			requestBody: strings.NewReader(`{"name":"name","password":"password"}`),
+			requestBody:          strings.NewReader(`{"name":"name","password":"password"}`),
 			expectedResponseCode: http.StatusInternalServerError,
 			expectedResponseBody: "",
 			setupUserModelMock: func(userModelMock *mocksmodels.UserInterface) {
@@ -149,7 +149,7 @@ func TestLogin(t *testing.T) {
 			setupTokenModelMock: func(tokenModelMock *mocksmodels.TokenInterface) {},
 		},
 		"error in CreateToken": {
-			requestBody: strings.NewReader(`{"name":"name","password":"password"}`),
+			requestBody:          strings.NewReader(`{"name":"name","password":"password"}`),
 			expectedResponseCode: http.StatusInternalServerError,
 			expectedResponseBody: "",
 			setupUserModelMock: func(userModelMock *mocksmodels.UserInterface) {

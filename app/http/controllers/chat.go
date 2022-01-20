@@ -10,14 +10,14 @@ import (
 
 	"github.com/oleksandr-chornovol/lets-go-chat/app/models"
 	"github.com/oleksandr-chornovol/lets-go-chat/cache"
-	"github.com/oleksandr-chornovol/lets-go-chat/config"
 )
 
 type ChatController struct {
 	ActiveUsersCache cache.ActiveUsersCacheInterface
-	MessageModel models.MessageInterface
-	TokenModel models.TokenInterface
-	UserModel models.UserInterface
+	MessageModel     models.MessageInterface
+	TokenModel       models.TokenInterface
+	UserModel        models.UserInterface
+	chMessage        chan []byte
 }
 
 func (c *ChatController) StartChat(response http.ResponseWriter, request *http.Request) {
@@ -57,9 +57,10 @@ func (c *ChatController) StartChat(response http.ResponseWriter, request *http.R
 
 		c.WriteMissedMessages(user)
 
-		c.ReadMessages(user)
+		c.chMessage = make(chan []byte, 1000)
 
-		c.EndUserSession(user)
+		go c.ReadMessages(user)
+		go c.ProcessMessages(user)
 	} else {
 		response.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(response, "Token is expired.")
@@ -70,15 +71,25 @@ func (c *ChatController) ReadMessages(user models.User) {
 	for {
 		_, message, err := user.Connection.ReadMessage()
 		if err != nil {
+			c.EndUserSession(user)
 			break
 		}
+		c.chMessage <- message
+	}
+}
 
-		_, err = c.MessageModel.CreateMessage(models.Message{UserId: user.Id, Text: string(message)})
+func (c *ChatController) ProcessMessages(user models.User) {
+	for {
+		msg, ok := <-c.chMessage
+		if !ok {
+			break
+		}
+		_, err := c.MessageModel.CreateMessage(models.Message{UserId: user.Id, Text: string(msg)})
 		if err != nil {
 			log.Println("CreateMessage failed, err:", err)
 		}
 
-		go c.BroadcastMessage(message)
+		c.BroadcastMessage(msg)
 	}
 }
 
@@ -116,9 +127,8 @@ func (c *ChatController) EndUserSession(user models.User) {
 }
 
 func (c *ChatController) GetActiveUsersCount(response http.ResponseWriter, request *http.Request) {
-	log.Println("!!!DB_URL!!!", config.Get("db_url"))
 	response.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(response).Encode(map[string]int {
+	json.NewEncoder(response).Encode(map[string]int{
 		"count_of_users": len(c.ActiveUsersCache.GetAllUsers()),
 	})
 }

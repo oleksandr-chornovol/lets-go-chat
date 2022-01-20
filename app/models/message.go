@@ -12,9 +12,9 @@ type MessageInterface interface {
 }
 
 type Message struct {
-	Id int
-	UserId string
-	Text string
+	Id        int
+	UserId    string
+	Text      string
 	CreatedAt string
 }
 
@@ -22,8 +22,8 @@ func (m *Message) CreateMessage(message Message) (Message, error) {
 	message.CreatedAt = time.Now().String()
 
 	attributes := map[string]string{
-		"user_id": message.UserId,
-		"text": message.Text,
+		"user_id":    message.UserId,
+		"text":       message.Text,
 		"created_at": message.CreatedAt,
 	}
 	err := database.Driver.Insert("messages", attributes)

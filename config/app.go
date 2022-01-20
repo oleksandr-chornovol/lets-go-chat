@@ -4,14 +4,14 @@ import "os"
 
 var app = map[string]map[string]string{
 	"local": {
-		"port": "8080",
+		"port":      "8080",
 		"db_driver": "mysql",
-		"db_url": "root:root@/lets-go-chat",
+		"db_url":    "root:root@/lets-go-chat",
 	},
 	"heroku": {
-		"port": os.Getenv("PORT"),
+		"port":      os.Getenv("PORT"),
 		"db_driver": "mysql",
-		"db_url": os.Getenv("DATABASE_URL"),
+		"db_url":    os.Getenv("DATABASE_URL"),
 	},
 }
 

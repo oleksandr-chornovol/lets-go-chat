@@ -13,20 +13,20 @@ import (
 var router = chi.NewRouter()
 
 type Route struct {
-	Path string
+	Path    string
 	Handler func(http.ResponseWriter, *http.Request)
 }
 
 func InitRoutes() {
-	userController := controllers.UserController {
+	userController := controllers.UserController{
 		TokenModel: &models.Token{},
-		UserModel: &models.User{},
+		UserModel:  &models.User{},
 	}
-	chatController := controllers.ChatController {
+	chatController := controllers.ChatController{
 		ActiveUsersCache: cache.NewActiveUsersCache(),
-		MessageModel: &models.Message{},
-		TokenModel: &models.Token{},
-		UserModel: &models.User{},
+		MessageModel:     &models.Message{},
+		TokenModel:       &models.Token{},
+		UserModel:        &models.User{},
 	}
 
 	router.Use(middleware.Logger)

@@ -62,7 +62,7 @@ func TestStartChatNegativeCases(t *testing.T) {
 	cases := map[string]struct {
 		expectedResponseCode int
 		expectedResponseBody string
-		setupTokenModelMock func(tokenModelMock *mocksmodels.TokenInterface)
+		setupTokenModelMock  func(tokenModelMock *mocksmodels.TokenInterface)
 	}{
 		"token is expired": {
 			expectedResponseCode: http.StatusBadRequest,
@@ -102,8 +102,8 @@ func TestStartChatNegativeCases(t *testing.T) {
 
 			chatController := ChatController{
 				ActiveUsersCache: cache.NewActiveUsersCache(),
-				TokenModel: tokenModelMock,
-				UserModel: &models.User{},
+				TokenModel:       tokenModelMock,
+				UserModel:        &models.User{},
 			}
 
 			response := httptest.NewRecorder()
@@ -126,10 +126,10 @@ func TestGetActiveUsersCount(t *testing.T) {
 	activeUsersCacheMock.On("GetAllUsers").
 		Return(getAllUsersResult)
 
-	chatController := ChatController {
+	chatController := ChatController{
 		ActiveUsersCache: activeUsersCacheMock,
-		TokenModel: &models.Token{},
-		UserModel: &models.User{},
+		TokenModel:       &models.Token{},
+		UserModel:        &models.User{},
 	}
 
 	response := httptest.NewRecorder()

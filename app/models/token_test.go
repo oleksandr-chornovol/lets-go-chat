@@ -8,7 +8,6 @@ import (
 
 	"github.com/oleksandr-chornovol/lets-go-chat/database"
 	"github.com/oleksandr-chornovol/lets-go-chat/database/drivers"
-
 )
 
 func TestCreateToken(t *testing.T) {
