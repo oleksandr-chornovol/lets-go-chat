@@ -17,6 +17,10 @@ type Token struct {
 	ExpiresAt string
 }
 
+func NewTokenModel() *Token {
+	return &Token{}
+}
+
 func (t *Token) CreateToken(token Token) (Token, error) {
 	token.Id = uuid.New().String()
 	token.ExpiresAt = time.Now().Add(time.Hour).String()

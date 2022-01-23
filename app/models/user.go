@@ -22,6 +22,10 @@ type User struct {
 	Connection     *websocket.Conn
 }
 
+func NewUserModel() *User {
+	return &User{}
+}
+
 func (u *User) CreateUser(user User) (User, error) {
 	user.Id = uuid.New().String()
 	user.Password, _ = hasher.HashPassword(user.Password)

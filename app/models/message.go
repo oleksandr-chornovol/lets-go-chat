@@ -18,6 +18,10 @@ type Message struct {
 	CreatedAt string
 }
 
+func NewMessageModel() *Message {
+	return &Message{}
+}
+
 func (m *Message) CreateMessage(message Message) (Message, error) {
 	message.CreatedAt = time.Now().String()
 
