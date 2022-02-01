@@ -189,13 +189,3 @@ func TestLogin(t *testing.T) {
 		})
 	}
 }
-
-func TestGetUserData(t *testing.T) {
-	request, err := http.NewRequest(http.MethodPost, "/", strings.NewReader(`{"name":"name","password":"password"}`))
-	assert.Nil(t, err)
-
-	userData := getUserData(request)
-
-	assert.Equal(t, "name", userData.Name)
-	assert.Equal(t, "password", userData.Password)
-}

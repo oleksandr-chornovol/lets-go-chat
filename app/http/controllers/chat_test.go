@@ -137,7 +137,7 @@ func TestGetActiveUsersCount(t *testing.T) {
 	handler.ServeHTTP(response, request)
 
 	assert.Equal(t, http.StatusOK, response.Code)
-	assert.Equal(t, "{\"count_of_users\":1}\n", response.Body.String())
+	assert.Equal(t, "{\"count\":1}\n", response.Body.String())
 }
 
 func getHandlerFunc(handler http.HandlerFunc) http.HandlerFunc {

@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.1.0
 info:
   title: Fancy Golang chat
   description: Just a simple chat service
@@ -7,10 +7,12 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: 1.0.0
 servers:
-  - url: https://lets-go-chat-chornovol.herokuapp.com/v1
+  - url: /v1
 tags:
   - name: user
     description: Operations about user
+  - name: chat
+    description: Operations related to chat
 paths:
   /user:
     post:
@@ -34,10 +36,10 @@ paths:
                 $ref: '#/components/schemas/CreateUserResponse'
         400:
           description: Bad request, empty username or id
-          content: { }
+          content: {}
         500:
           description: Internal Server Error
-          content: { }
+          content: {}
       x-codegen-request-body-name: body
   /user/login:
     post:
@@ -72,16 +74,56 @@ paths:
                 $ref: '#/components/schemas/LoginUserResonse'
         400:
           description: Invalid username/password
-          content: { }
+          content: {}
         500:
           description: Internal Server Error
-          content: { }
+          content: {}
+  /user/active:
+    get:
+      tags:
+        - user
+        - chat
+      summary: Number of active users in a chat
+      operationId: getActiveUsers
+      responses:
+        200:
+          description: successful operation, returns number of active users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveUsersResponse'
+        500:
+          description: Internal Server Error
+          content: {}
+  /chat:
+    get:
+      tags:
+        - chat
+      summary: Endpoint to start real time chat
+      operationId: startChat
+      parameters:
+        - name: token
+          in: query
+          required: true
+          description: One time token for a loged user
+          schema:
+            type: string
+      responses:
+        101:
+          description: Upgrade to websocket protocol
+          content: {}
+        400:
+          description: Invalid token
+          content: {}
+        500:
+          description: Internal Server Error
+          content: {}
 components:
   schemas:
     LoginUserRequest:
       required:
         - password
-        - userName
+        - name
       type: object
       properties:
         name:
@@ -102,7 +144,7 @@ components:
     CreateUserRequest:
       required:
         - password
-        - userName
+        - name
       type: object
       properties:
         name:
@@ -112,10 +154,20 @@ components:
           minLength: 8
           type: string
     CreateUserResponse:
+      required:
+        - id
+        - name
       type: object
       properties:
         id:
           type: string
           format: uuid
-        userName:
+        name:
           type: string
+    ActiveUsersResponse:
+      required:
+        - count
+      type: object
+      properties:
+        count:
+          type: integer

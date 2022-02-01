@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"pkg/hasher"
 
+	"github.com/oleksandr-chornovol/lets-go-chat/app"
 	"github.com/oleksandr-chornovol/lets-go-chat/app/models"
 )
 
@@ -15,9 +16,21 @@ type UserController struct {
 	UserModel  models.UserInterface
 }
 
+func NewUserController(tokenModel models.TokenInterface, userModel models.UserInterface) *UserController {
+	return &UserController{
+		TokenModel: tokenModel,
+		UserModel:  userModel,
+	}
+}
+
 func (c *UserController) Register(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
-	userData := getUserData(request)
+
+	userData := &app.CreateUserRequest{}
+	err := json.NewDecoder(request.Body).Decode(userData)
+	if err != nil {
+		log.Println("json decode failed, err:", err)
+	}
 
 	if len(userData.Name) < 4 || len(userData.Password) < 8 {
 		response.WriteHeader(http.StatusBadRequest)
@@ -25,7 +38,7 @@ func (c *UserController) Register(response http.ResponseWriter, request *http.Re
 		return
 	}
 
-	_, err := c.UserModel.GetUserByField("name", userData.Name)
+	_, err = c.UserModel.GetUserByField("name", userData.Name)
 	if err != nil {
 		if err.Error() != "sql: no rows in result set" {
 			log.Println("GetUserByField failed, err:", err)
@@ -38,7 +51,11 @@ func (c *UserController) Register(response http.ResponseWriter, request *http.Re
 		return
 	}
 
-	user, err := c.UserModel.CreateUser(userData)
+	user, err := c.UserModel.CreateUser(models.User{
+		Name: userData.Name,
+		Password: userData.Password,
+	})
+
 	if err != nil {
 		log.Println("CreateUser failed, err:", err)
 		response.WriteHeader(http.StatusInternalServerError)
@@ -46,16 +63,21 @@ func (c *UserController) Register(response http.ResponseWriter, request *http.Re
 	}
 
 	response.WriteHeader(http.StatusCreated)
-	json.NewEncoder(response).Encode(map[string]string{
-		"id":   user.Id,
-		"name": user.Name,
+	json.NewEncoder(response).Encode(app.CreateUserResponse{
+		Id: user.Id,
+		Name: user.Name,
 	})
 }
 
 func (c *UserController) Login(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
 
-	userData := getUserData(request)
+	userData := &app.LoginUserRequest{}
+	err := json.NewDecoder(request.Body).Decode(userData)
+	if err != nil {
+		log.Println("json decode failed, err:", err)
+	}
+
 	user, err := c.UserModel.GetUserByField("name", userData.Name)
 	if err != nil {
 		if err.Error() == "sql: no rows in result set" {
@@ -77,21 +99,11 @@ func (c *UserController) Login(response http.ResponseWriter, request *http.Reque
 			return
 		}
 
-		json.NewEncoder(response).Encode(map[string]string{
-			"url": "ws://" + request.Host + "/v1/chat?token=" + token.Id,
+		json.NewEncoder(response).Encode(app.LoginUserResonse{
+			Url: "ws://" + request.Host + "/v1/chat?token=" + token.Id,
 		})
 	} else {
 		response.WriteHeader(http.StatusUnauthorized)
 		fmt.Fprint(response, "Password is incorrect.")
 	}
-}
-
-func getUserData(request *http.Request) models.User {
-	decoder := json.NewDecoder(request.Body)
-	var userData models.User
-	err := decoder.Decode(&userData)
-	if err != nil {
-		log.Println("Decode failed, err:", err)
-	}
-	return userData
 }

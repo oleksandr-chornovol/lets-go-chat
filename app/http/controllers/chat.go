@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/oleksandr-chornovol/lets-go-chat/app"
 	"github.com/oleksandr-chornovol/lets-go-chat/app/models"
 	"github.com/oleksandr-chornovol/lets-go-chat/cache"
 )
@@ -18,6 +19,20 @@ type ChatController struct {
 	TokenModel       models.TokenInterface
 	UserModel        models.UserInterface
 	chMessage        chan []byte
+}
+
+func NewChatController(
+	activeUsersCache cache.ActiveUsersCacheInterface,
+	messageModel models.MessageInterface,
+	tokenModel models.TokenInterface,
+	userModel models.UserInterface,
+) *ChatController {
+	return &ChatController{
+		ActiveUsersCache: activeUsersCache,
+		MessageModel:     messageModel,
+		TokenModel:       tokenModel,
+		UserModel:        userModel,
+	}
 }
 
 func (c *ChatController) StartChat(response http.ResponseWriter, request *http.Request) {
@@ -55,30 +70,30 @@ func (c *ChatController) StartChat(response http.ResponseWriter, request *http.R
 		user.Connection = conn
 		c.ActiveUsersCache.AddUser(user)
 
-		c.WriteMissedMessages(user)
+		c.writeMissedMessages(user)
 
 		c.chMessage = make(chan []byte, 1000)
 
-		go c.ReadMessages(user)
-		go c.ProcessMessages(user)
+		go c.readMessages(user)
+		go c.processMessages(user)
 	} else {
 		response.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(response, "Token is expired.")
 	}
 }
 
-func (c *ChatController) ReadMessages(user models.User) {
+func (c *ChatController) readMessages(user models.User) {
 	for {
 		_, message, err := user.Connection.ReadMessage()
 		if err != nil {
-			c.EndUserSession(user)
+			c.endUserSession(user)
 			break
 		}
 		c.chMessage <- message
 	}
 }
 
-func (c *ChatController) ProcessMessages(user models.User) {
+func (c *ChatController) processMessages(user models.User) {
 	for {
 		msg, ok := <-c.chMessage
 		if !ok {
@@ -89,11 +104,11 @@ func (c *ChatController) ProcessMessages(user models.User) {
 			log.Println("CreateMessage failed, err:", err)
 		}
 
-		c.BroadcastMessage(msg)
+		c.broadcastMessage(msg)
 	}
 }
 
-func (c *ChatController) BroadcastMessage(message []byte) {
+func (c *ChatController) broadcastMessage(message []byte) {
 	for _, user := range c.ActiveUsersCache.GetAllUsers() {
 		err := user.Connection.WriteMessage(1, message)
 		if err != nil {
@@ -102,7 +117,7 @@ func (c *ChatController) BroadcastMessage(message []byte) {
 	}
 }
 
-func (c *ChatController) WriteMissedMessages(user models.User) {
+func (c *ChatController) writeMissedMessages(user models.User) {
 	for _, message := range c.MessageModel.GetMessagesFromTime(user.LastSessionEnd) {
 		err := user.Connection.WriteMessage(1, []byte(message.Text))
 		if err != nil {
@@ -111,7 +126,7 @@ func (c *ChatController) WriteMissedMessages(user models.User) {
 	}
 }
 
-func (c *ChatController) EndUserSession(user models.User) {
+func (c *ChatController) endUserSession(user models.User) {
 	c.ActiveUsersCache.DeleteUser(user.Id)
 
 	err := user.Connection.Close()
@@ -128,7 +143,7 @@ func (c *ChatController) EndUserSession(user models.User) {
 
 func (c *ChatController) GetActiveUsersCount(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(response).Encode(map[string]int{
-		"count_of_users": len(c.ActiveUsersCache.GetAllUsers()),
+	json.NewEncoder(response).Encode(app.ActiveUsersResponse{
+		Count: len(c.ActiveUsersCache.GetAllUsers()),
 	})
 }
